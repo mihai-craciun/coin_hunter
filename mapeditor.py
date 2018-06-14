@@ -82,12 +82,12 @@ while running:
                 if CRT_BLOCK_Y < 0:
                     CAMERA_Y -= B_SIZE * CRT_BLOCK_Y
                     CRT_BLOCK_Y = 0
-                if CRT_BLOCK_X > 0:
-                    CAMERA_X -= B_SIZE * CRT_BLOCK_X
-                    CRT_BLOCK_X = 0
-                if CRT_BLOCK_Y > 0:
-                    CAMERA_Y -= B_SIZE * CRT_BLOCK_Y
-                    CRT_BLOCK_Y = 0
+                if CRT_BLOCK_X >= len(game_map.map):
+                    CAMERA_X -= B_SIZE * (CRT_BLOCK_X - len(game_map.map))
+                    CRT_BLOCK_X = len(game_map.map)-1
+                if CRT_BLOCK_Y >= len(game_map.map[0]):
+                    CAMERA_Y -= B_SIZE * (CRT_BLOCK_Y - len(game_map.map[0]))
+                    CRT_BLOCK_Y = len(game_map.map[0])-1
             if event.key == pygame.K_e:
                 game_map.setend(CRT_BLOCK_X, CRT_BLOCK_Y)
                 if CRT_BLOCK_X >= len(game_map.map):
