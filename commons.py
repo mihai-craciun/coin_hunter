@@ -37,6 +37,7 @@ v = 1
 for it in ITEM_NAMES:
     exec("{0}={1}".format(it, v))
     v <<= 1
+
 # PNG map
 PNGS = {
     WATER: "water.png",
@@ -75,7 +76,7 @@ HEIGHT = BLOCKS_Y * B_SIZE
 pygame.init()
 pygame.mixer.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
-FONT = pygame.font.Font("pixelated.ttf", 8*SCALE)
+FONT = pygame.font.Font("pixelated.ttf", 10*SCALE)
 
 
 # Map
@@ -87,7 +88,6 @@ class Map:
     def __init__(self, rows=8, cols=4):
         self.map = [[BLANK for i in range(rows)]
                     for j in range(cols)]
-        self.map[1][0] |= COIN
 
     def draw(self, screen, cam_x=0, cam_y=0):
         for i, line in enumerate(self.map):
@@ -140,6 +140,7 @@ class Map:
         if x+1 < len(self.map):
             self.map = self.map[:x+1]
 
+    # DEBUG
     def printsize(self):
         print([len(self.map[i]) for i in range(len(self.map))])
 

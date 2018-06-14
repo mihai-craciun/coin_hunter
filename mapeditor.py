@@ -8,10 +8,14 @@ TITLE = "Map Editor"
 pygame.display.set_caption(TITLE)
 clock = pygame.time.Clock()
 all_sprites = pygame.sprite.Group()
+
 game_map = Map()
 CRT_BLOCK = pygame.Surface((B_SIZE, B_SIZE))
 CRT_BLOCK.set_alpha(128)
 CRT_BLOCK.fill(WHITE)
+
+CAMERA_X = -WIDTH//2+(len(game_map.map)//2*B_SIZE)
+CAMERA_Y = -HEIGHT//2+(len(game_map.map[0])//2*B_SIZE)
 
 CRT_BLOCK_X = 0
 CRT_BLOCK_Y = 0
@@ -19,6 +23,7 @@ CRT_BLOCK_Y = 0
 TEXT_CRT = FONT.render("Current block:", False, WHITE)
 TEXT_HELP_TOGGLE = FONT.render("Help : H", False, WHITE)
 
+SHOW_HELP = False
 TEXT_HELP_ITEMS = [
     "Help: H",
     "Set map begin: B",
@@ -27,6 +32,7 @@ TEXT_HELP_ITEMS = [
     "XOR crt: SPACE",
     "Change item: Tab",
     "Move: Arrows",
+    "Quit: Q"
 ]
 
 for i in range(len(TEXT_HELP_ITEMS)):
@@ -38,7 +44,6 @@ ITEM_CRT_SURFACE = pygame.Surface(
     (B_SIZE+2*ITEM_CRT_SURFACE_OFFSET, B_SIZE+2*ITEM_CRT_SURFACE_OFFSET))
 ITEM_CRT_SURFACE.fill(WHITE)
 ITEM_CRT_SURFACE.set_alpha(128)
-SHOW_HELP = False
 MOVE_TICKER = 3
 
 # Game loop
@@ -52,10 +57,13 @@ while running:
         if event.type == pygame.QUIT:
             running = False
         if event.type == pygame.KEYDOWN:
+            # Debug
             if event.key == pygame.K_1:
                 game_map.printsize()
             if event.key == pygame.K_2:
                 game_map.printbock(CRT_BLOCK_X, CRT_BLOCK_Y)
+            if event.key == pygame.K_q:
+                running = False
             if event.key == pygame.K_TAB:
                 # Change current item
                 ITEM_CRT = ITEMS[(ITEMS.index(ITEM_CRT)+1) % len(ITEMS)]
@@ -84,21 +92,24 @@ while running:
                 game_map.setend(CRT_BLOCK_X, CRT_BLOCK_Y)
                 if CRT_BLOCK_X >= len(game_map.map):
                     CRT_BLOCK_X = len(game_map.map)-1
+                if CRT_BLOCK_X < 0:
+                    CRT_BLOCK_X = 0
+                if CRT_BLOCK_Y >= len(game_map.map):
+                    CRT_BLOCK_Y = len(game_map.map[0])-1
                 if CRT_BLOCK_Y < 0:
                     CRT_BLOCK_Y = 0
-                if CRT_BLOCK_X <= len(game_map.map):
-                    CRT_BLOCK_X = len(game_map.map)-1
-                if CRT_BLOCK_Y > 0:
-                    CRT_BLOCK_Y > 0
 
     # Update
     all_sprites.update()
     # Update texts
     TEXT_Y = FONT.render("Y:{}".format(CRT_BLOCK_Y), False, WHITE)
     TEXT_X = FONT.render("X:{}".format(CRT_BLOCK_X), False, WHITE)
-    TEXT_SIZE = FONT.render("Size:{0}x{1}".format(len(game_map.map), len(game_map.map[0])), False, WHITE)
+    TEXT_SIZE = FONT.render("Size:{0}x{1}".format(
+        len(game_map.map), len(game_map.map[0])), False, WHITE)
     # Get input
     keys = pygame.key.get_pressed()
+    if keys[pygame.K_h]:
+        SHOW_HELP = True
     if MOVE_TICKER == 0 and set(keys) != set([0]):
         MOVE_TICKER = 3
         if keys[pygame.K_RIGHT]:
@@ -134,9 +145,16 @@ while running:
     screen.blit(TEXT_SIZE, (10, HEIGHT - TEXT_X.get_height()))
     screen.blit(TEXT_CRT, (WIDTH - TEXT_CRT.get_width(), 0))
     screen.blit(ITEM_CRT_SURFACE, (WIDTH -
-                                   ITEM_CRT_SURFACE.get_width() - 10, TEXT_CRT.get_height()))
+                                   ITEM_CRT_SURFACE.get_width() - 10,
+                                   TEXT_CRT.get_height()))
     screen.blit(PNGS[ITEM_CRT], (WIDTH - ITEM_CRT_SURFACE.get_width() -
                                  10 + 10, TEXT_CRT.get_height()+10))
+
+    if SHOW_HELP:
+        for i, s in enumerate(TEXT_HELP_ITEMS):
+            screen.blit(s, (WIDTH//2 - s.get_width()//2, HEIGHT //
+                            2 - (len(TEXT_HELP_ITEMS)-i)*s.get_height()))
+        SHOW_HELP = False
     all_sprites.draw(screen)
     # *after* drawing everything
     pygame.display.flip()
