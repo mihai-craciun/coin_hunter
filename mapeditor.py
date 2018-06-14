@@ -9,7 +9,6 @@ pygame.display.set_caption(TITLE)
 clock = pygame.time.Clock()
 all_sprites = pygame.sprite.Group()
 game_map = Map()
-
 CRT_BLOCK = pygame.Surface((B_SIZE, B_SIZE))
 CRT_BLOCK.set_alpha(128)
 CRT_BLOCK.fill(WHITE)

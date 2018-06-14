@@ -17,22 +17,34 @@ DEEPGREY = (50, 50, 50)
 RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
-# Terrains
-BLANK = 1
-WATER = 2
-DIRT = 4
-DIRT_TREE = 8
-DIRT_TREE_BURN = 16
-# Collectibles
-COIN = 32
-BLUE_CRYSTAL = 64
-RED_CRYSTAL = 128
+
+# Item strings
+ITEM_NAMES = [
+    # Terrains
+    "BLANK",
+    "WATER",
+    "DIRT",
+    "GRASS",
+    # Collectibles
+    "TREE",
+    "DRY_TREE",
+    "DRY_TREE_BURN",
+    "COIN",
+    "BLUE_CRYSTAL",
+    "RED_CRYSTAL",
+]
+v = 1
+for it in ITEM_NAMES:
+    exec("{0}={1}".format(it, v))
+    v <<= 1
 # PNG map
 PNGS = {
     WATER: "water.png",
     DIRT: "terrain.png",
-    DIRT_TREE: "terrain_tree.png",
-    DIRT_TREE_BURN: "terrain_tree_burn.png",
+    GRASS: "grass.png",
+    TREE: "tree.png",
+    DRY_TREE: "dry_tree.png",
+    DRY_TREE_BURN: "dry_tree_burn.png",
     COIN: "coin.png",
     BLUE_CRYSTAL: "blue_crystal.png",
     RED_CRYSTAL: "red_crystal.png",
@@ -45,13 +57,15 @@ for k in PNGS:
 TERRAINS = [
     WATER,
     DIRT,
-    DIRT_TREE,
-    DIRT_TREE_BURN
+    GRASS,
 ]
 COLLECTIBLES = [
+    TREE,
+    DRY_TREE,
+    DRY_TREE_BURN,
     COIN,
     BLUE_CRYSTAL,
-    RED_CRYSTAL
+    RED_CRYSTAL,
 ]
 ITEMS = TERRAINS + COLLECTIBLES
 # initialize pygame and create window
@@ -71,7 +85,7 @@ BLANK_SURFACE.fill(DEEPGREY)
 
 class Map:
     def __init__(self, rows=8, cols=4):
-        self.map = [[WATER for i in range(rows)]
+        self.map = [[BLANK for i in range(rows)]
                     for j in range(cols)]
         self.map[1][0] |= COIN
 
@@ -81,7 +95,7 @@ class Map:
                 # Position
                 pos = (i*B_SIZE - cam_x, j*B_SIZE - cam_y)
                 # Check if has terrain to draw
-                if item == BLANK:
+                if item & BLANK > 0:
                     screen.blit(BLANK_SURFACE, pos)
                 for t in TERRAINS:
                     if item & t > 0:
@@ -100,7 +114,8 @@ class Map:
             for i in range(len(self.map)):
                 self.map[i] = [BLANK for _ in range(-y)] + self.map[i]
         if x < 0:
-            self.map =[[BLANK for a in self.map[0]] for b in range(-x)] + self.map
+            self.map = [[BLANK for a in self.map[0]]
+                        for b in range(-x)] + self.map
         if y > 0:
             for i in range(len(self.map)):
                 self.map[i] = self.map[i][y:]
@@ -114,17 +129,19 @@ class Map:
             return
         if y+1 > len(self.map[0]):
             for i in range(len(self.map)):
-                self.map[i] = self.map[i] + [BLANK for _ in range(y-len(self.map[i])+1)]
+                self.map[i] = self.map[i] + \
+                    [BLANK for _ in range(y-len(self.map[i])+1)]
         if x+1 > len(self.map):
-            self.map = self.map + [[BLANK for a in self.map[0]] for b in range(x-len(self.map)+1)]
+            self.map = self.map + [[BLANK for a in self.map[0]]
+                                   for b in range(x-len(self.map)+1)]
         if y+1 < len(self.map[0]):
             for i in range(len(self.map)):
                 self.map[i] = self.map[i][:y+1]
         if x+1 < len(self.map):
             self.map = self.map[:x+1]
-    
+
     def printsize(self):
         print([len(self.map[i]) for i in range(len(self.map))])
-    
+
     def printbock(self, x, y):
         print(self.map[x][y])
