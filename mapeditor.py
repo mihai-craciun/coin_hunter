@@ -60,16 +60,17 @@ TEXT_HELP_TOGGLE = FONT.render("Help : H", False, WHITE)
 SHOW_HELP = False
 TEXT_HELP_ITEMS = [
     "Help: H",
-    "Set map begin: B",
-    "Set map end: E",
+    "Save: S",
+    "Quit: Q",
     "Zoom in: 1",
     "Zoom out: 2",
-    "Delete crt: D",
-    "Change t/c to: SPACE",
-    "Change item: Tab",
     "Move: Arrows",
-    "Quit: Q",
     "Set player: P",
+    "Set map end: E",
+    "Set map begin: B",
+    "Delete crt block: D",
+    "Change crt item: Tab",
+    "Change crt block t/c crt item: SPACE",
     "",
     "Open with argument map file to load previous map!"
 ]
