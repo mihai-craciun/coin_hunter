@@ -182,7 +182,13 @@ class Map:
         if IS_PLAYER == False:
             return "No player"
         return None
-                
+
+    def get_player(self):
+        for x,line in enumerate(self.map):
+            for y,item in enumerate(line):
+                if item&PLAYER == PLAYER:
+                    return (x,y)
+
     # DEBUG
     def printsize(self):
         print([len(self.map[i]) for i in range(len(self.map))])

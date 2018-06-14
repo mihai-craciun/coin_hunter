@@ -12,14 +12,31 @@ pygame.display.set_caption(TITLE)
 clock = pygame.time.Clock()
 all_sprites = pygame.sprite.Group()
 
+ERROR = ""
+ERROR_TICKER = 0
+
+PLAYER_X = None
+PLAYER_Y = None
+
 if len(argv) == 1:
     game_map = Map()
 else:
-    with open(argv[1],'r') as loadmap:
-        mapstring = loadmap.read()
+    try:
+        with open(argv[1],'r') as loadmap:
+            mapstring = loadmap.read()
         exec("lmap = {}".format(mapstring))
         game_map = Map(m=lmap)
-
+        err = game_map.check()
+        if err is not None:
+            ERROR = "Invalid map, started new one"
+            ERROR_TICKER = FPS*5
+            game_map = Map()
+        else:
+            PLAYER_X, PLAYER_Y = game_map.get_player()
+    except:
+            ERROR = "Invalid map, started new one"
+            ERROR_TICKER = FPS*5
+            game_map = Map()    
 CRT_BLOCK = pygame.Surface((B_SIZE, B_SIZE))
 CRT_BLOCK.set_alpha(128)
 CRT_BLOCK.fill(WHITE)
@@ -30,9 +47,6 @@ CAMERA_Y = -HEIGHT//2+(len(game_map.map[0])//2*B_SIZE)
 PLAYER_POS = pygame.Surface((B_SIZE, B_SIZE))
 PLAYER_POS.set_alpha(128)
 PLAYER_POS.fill(GREEN)
-
-PLAYER_X = None
-PLAYER_Y = None
 
 CRT_BLOCK_X = 0
 CRT_BLOCK_Y = 0
@@ -70,9 +84,6 @@ ITEM_CRT_SURFACE = pygame.Surface(
 ITEM_CRT_SURFACE.fill(WHITE)
 ITEM_CRT_SURFACE.set_alpha(128)
 MOVE_TICKER = 3
-
-ERROR = ""
-ERROR_TICKER = 0
 
 # Game loop
 running = True
