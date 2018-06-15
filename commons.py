@@ -201,7 +201,7 @@ class Map:
         return items
 
     def can_move(self, px, py, px2, py2, specials):
-        if px2 == 0 or py2 == 0 or px2 >= len(self.map) or py2 >= len(self.map[0]):
+        if px2 == -1 or py2 == -1 or px2 >= len(self.map) or py2 >= len(self.map[0]):
             return False
         block = self.map[px2][py2]
         if block & TREE > 0 or block & DRY_TREE > 0 or block & DRY_TREE_BURN > 0:

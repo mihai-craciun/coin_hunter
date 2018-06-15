@@ -151,23 +151,26 @@ class Player(pygame.sprite.Sprite):
         mapy = tomapcoord(player.y + HITBOX_OFFSET)
 
         if keystate[pygame.K_RIGHT]:
+            RIGHT_OFFSET = HITBOX_OFFSET
             nextmapy = mapy
-            nextmapx = tomapcoord(player.x+self.speed + HITBOX_OFFSET)
+            nextmapx = tomapcoord(player.x+self.speed + RIGHT_OFFSET)
             if game_map.can_move(mapx, mapy, nextmapx, nextmapy, self.specials):
                 item = game_map.get_collectible(nextmapx, nextmapy)
                 player.collect(nextmapx, nextmapy, item)
                 self.x += self.speed
             self.orient = Player.RIGHT
         if keystate[pygame.K_LEFT]:
+            LEFT_OFFSET = (HITBOX_OFFSET//4 if player.x-self.speed >=0 else -HITBOX_OFFSET)
             nextmapy = mapy
-            nextmapx = tomapcoord(player.x-self.speed + HITBOX_OFFSET//4)
+            nextmapx = tomapcoord(player.x-self.speed + LEFT_OFFSET)
             if game_map.can_move(mapx, mapy, nextmapx, nextmapy, self.specials):
                 item = game_map.get_collectible(nextmapx, nextmapy)
                 player.collect(nextmapx, nextmapy, item)
                 self.x -= self.speed
             self.orient = Player.LEFT
         if keystate[pygame.K_UP]:
-            nextmapy = tomapcoord(player.y-self.speed + HITBOX_OFFSET)
+            UP_OFFSET = (HITBOX_OFFSET if player.y-self.speed >=0 else -HITBOX_OFFSET)
+            nextmapy = tomapcoord(player.y-self.speed + UP_OFFSET)
             nextmapx = mapx
             if game_map.can_move(mapx, mapy, nextmapx, nextmapy, self.specials):
                 item = game_map.get_collectible(nextmapx, nextmapy)
@@ -175,7 +178,8 @@ class Player(pygame.sprite.Sprite):
                 self.y -= self.speed
             self.orient = Player.UP
         if keystate[pygame.K_DOWN]:
-            nextmapy = tomapcoord(player.y+self.speed + HITBOX_OFFSET)
+            DOWN_OFFSET = HITBOX_OFFSET + 10
+            nextmapy = tomapcoord(player.y+self.speed + DOWN_OFFSET)
             nextmapx = mapx
             if game_map.can_move(mapx, mapy, nextmapx, nextmapy, self.specials):
                 item = game_map.get_collectible(nextmapx, nextmapy)
