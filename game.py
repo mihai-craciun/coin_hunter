@@ -35,6 +35,24 @@ TIME_INITIAL = time.time()
 
 BURNING_TREES = []
 
+SHOW_HELP = False
+TEXT_HELP_ITEMS = [
+    "The game goal is to collect",
+    " all the coins. You can",
+    "walk on water if you have", 
+    "the blue crystal, and you",
+    "can burn dry trees if you",
+    "have the white crystal.",
+    "",
+    "Help : H",
+    "Move : Arrows",
+    "Burn : SPACE",
+    "Quit : Q",
+]
+
+for i,t in enumerate(TEXT_HELP_ITEMS):
+    TEXT_HELP_ITEMS[i] = FONT.render(TEXT_HELP_ITEMS[i], False, WHITE)
+
 def tomapcoord(coord):
     return int(coord/B_SIZE)
 
@@ -115,6 +133,7 @@ class Player(pygame.sprite.Sprite):
         return
 
     def update(self):
+        global SHOW_HELP
         keystate = pygame.key.get_pressed()
         # Verify if switch image
         if keystate[pygame.K_RIGHT] or keystate[pygame.K_LEFT] or keystate[pygame.K_UP] or keystate[pygame.K_DOWN]:
@@ -178,6 +197,8 @@ class Player(pygame.sprite.Sprite):
             if game_map.burn(mapx, mapy, nx, ny, self.specials):
                 self.sounds[Player.BURN].play()
                 BURNING_TREES.append([2*FPS, mapx+nx, mapy+ny])
+        if keystate[pygame.K_h]:
+            SHOW_HELP = True
 
     def draw(self, screen):
         screen.blit(self.image, (WIDTH//2-self.image.get_width() //
@@ -211,6 +232,7 @@ while running:
     TEXT_SPECIALS = FONT.render('Specials :', False, WHITE)
     TIME_NOW = int(time.time() - TIME_INITIAL)
     TEXT_TIME = FONT.render('Time : {0:02d}:{1:02d}'.format(TIME_NOW//60, TIME_NOW%60), False, WHITE)
+    TEXT_HELP = FONT.render('Help : H', False, WHITE)
     # Update burning trees
     i = 0
     while i < len(BURNING_TREES):
@@ -236,6 +258,11 @@ while running:
     screen.blit(PNGS[COIN], (TEXT_COINS.get_width()+ MARGIN_OFFSET ,0))
     screen.blit(TEXT_COINS, (MARGIN_OFFSET, PNGS[COIN].get_height()//2 - TEXT_COINS.get_height()//2))
     screen.blit(TEXT_SPECIALS, (MARGIN_OFFSET, PNGS[COIN].get_height()))
+    screen.blit(TEXT_HELP, (WIDTH - TEXT_HELP.get_width() - MARGIN_OFFSET, HEIGHT - TEXT_HELP.get_height() - MARGIN_OFFSET))
+    if SHOW_HELP:
+        SHOW_HELP = False
+        for i,t in enumerate(TEXT_HELP_ITEMS):
+            screen.blit(t, (WIDTH//2 - t.get_width()//2, HEIGHT//2 - (len(TEXT_HELP_ITEMS) - i*2 )*t.get_height()//2))
     SPEC_OFFSET = 0
     for c in COLLECTIBLES:
         if c&player.specials:
