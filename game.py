@@ -73,7 +73,7 @@ class Player(pygame.sprite.Sprite):
 
     @staticmethod
     def getscaled(img_name):
-        path = 'player/'
+        path = 'images/player/'
         ext = '.png'
         return pygame.transform.scale(pygame.image.load(os.path.join(path+img_name+ext)), (B_SIZE, B_SIZE))
 
@@ -98,11 +98,12 @@ class Player(pygame.sprite.Sprite):
                 Player.getscaled('link_right_2'),
             ],
         }
+        sounds_path = 'sfx/'
         self.sounds = {
-            Player.WALK: pygame.mixer.Sound('footstep.wav'),
-            Player.BURN: pygame.mixer.Sound('burn.wav'),
-            Player.GET_COIN: pygame.mixer.Sound('coin.wav'),
-            Player.GET_CRYSTAL: pygame.mixer.Sound('crystal.wav'),
+            Player.WALK: pygame.mixer.Sound(sounds_path+'footstep.wav'),
+            Player.BURN: pygame.mixer.Sound(sounds_path+'burn.wav'),
+            Player.GET_COIN: pygame.mixer.Sound(sounds_path+'coin.wav'),
+            Player.GET_CRYSTAL: pygame.mixer.Sound(sounds_path+'crystal.wav'),
         }
 
         self.hitbox = pygame.Surface((Player.HITBOX, Player.HITBOX))

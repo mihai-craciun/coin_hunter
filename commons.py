@@ -53,9 +53,10 @@ PNGS = {
     RED_CRYSTAL: "red_crystal.png",
 }
 # Load PNG
+images_path = 'images/'
 for k in PNGS:
     PNGS[k] = pygame.transform.scale(pygame.image.load(
-        os.path.join(PNGS[k])), (B_SIZE*SCALE, B_SIZE*SCALE))
+        os.path.join(images_path+PNGS[k])), (B_SIZE*SCALE, B_SIZE*SCALE))
 # Group
 TERRAINS = [
     WATER,
