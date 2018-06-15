@@ -114,7 +114,7 @@ class Player(pygame.sprite.Sprite):
         self.rect.center = WIDTH//2, HEIGHT//2
         self.items = 0
         self.coins = 0
-        self.speed = 0.1 * B_SIZE
+        self.speed = int(0.1 * B_SIZE)
         self.orient = Player.DOWN
         self.count = 0
         self.count_ticker = Player.TICKER
