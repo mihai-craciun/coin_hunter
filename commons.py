@@ -2,12 +2,12 @@ import pygame
 import os
 
 # Window and engine
-FPS = 30
+FPS = 60
 CAMERA_X = 0
 CAMERA_Y = 0
 SCALE = 3
-BLOCKS_X = 16
-BLOCKS_Y = 16
+BLOCKS_X = 10
+BLOCKS_Y = 10
 B_SIZE = 16
 # define styles
 WHITE = (255, 255, 255)
