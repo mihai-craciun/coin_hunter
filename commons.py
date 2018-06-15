@@ -1,5 +1,6 @@
 import pygame
 import os
+from threading import Timer
 
 # Window and engine
 FPS = 60
@@ -158,19 +159,19 @@ class Map:
                 self.map[i] = self.map[i][:y+1]
         if x+1 < len(self.map):
             self.map = self.map[:x+1]
-    
+
     def check(self):
         COINS = 0
         IS_PLAYER = False
         for line in self.map:
             for item in line:
-                t = filters["COLLECTIBLES"]&item
+                t = filters["COLLECTIBLES"] & item
                 if t not in TERRAINS:
                     return "Missing terrain"
-                c = filters["TERRAINS"]&item
+                c = filters["TERRAINS"] & item
                 if c == COIN:
-                    COINS+=1
-                if item&PLAYER == PLAYER:
+                    COINS += 1
+                if item & PLAYER == PLAYER:
                     if IS_PLAYER == True:
                         return "Duplicate player"
                     elif c == 0 and t not in NONSTARTABLE:
@@ -185,42 +186,54 @@ class Map:
         return None
 
     def get_player(self):
-        for x,line in enumerate(self.map):
-            for y,item in enumerate(line):
-                if item&PLAYER == PLAYER:
-                    return (x,y)
-    
+        for x, line in enumerate(self.map):
+            for y, item in enumerate(line):
+                if item & PLAYER == PLAYER:
+                    return (x, y)
+
     def get_items(self, item):
         items = []
         for x, line in enumerate(self.map):
-            for y,it in enumerate(line):
-                if it&item == item:
-                    items.append((x,y))
+            for y, it in enumerate(line):
+                if it & item == item:
+                    items.append((x, y))
         return items
-    
+
     def can_move(self, px, py, px2, py2, specials):
-        print(px,py,px2,py2)
+        print(px, py, px2, py2)
         if px2 == 0 or py2 == 0 or px2 >= len(self.map) or py2 >= len(self.map[0]):
             return False
         block = self.map[px2][py2]
-        if block&TREE > 0 or block&DRY_TREE > 0 or block&DRY_TREE_BURN > 0:
+        if block & TREE > 0 or block & DRY_TREE > 0 or block & DRY_TREE_BURN > 0:
             return False
         # special cases check specials items
-        if specials&BLUE_CRYSTAL == 0 and block&WATER > 0:
+        if specials & BLUE_CRYSTAL == 0 and block & WATER > 0:
             return False
         return True
-    
+
     def get_collectible(self, x, y):
         item = None
         for c in COLLECTIBLES:
-            if c&self.map[x][y]:
+            if c & self.map[x][y]:
                 item = c
         return item
 
     def remove_collectible(self, x, y):
         self.map[x][y] &= filters["COLLECTIBLES"]
 
+    def burn(self, x, y, xdir, ydir, specials):
+        BURN_TIMEOUT = 2
+        if x+xdir < 0 or x+xdir == len(self.map) or y+ydir < 0 or y+ydir == len(self.map[0]):
+            return False
+        if specials & RED_CRYSTAL == 0:
+            return False
+        if self.map[x+xdir][y+ydir] & DRY_TREE == 0:
+            return False
+        self.map[x+xdir][y+ydir] = self.map[x +
+                                            xdir][y+ydir] ^ DRY_TREE | DRY_TREE_BURN
+        return True
     # DEBUG
+
     def printsize(self):
         print([len(self.map[i]) for i in range(len(self.map))])
 

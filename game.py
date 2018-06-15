@@ -33,6 +33,8 @@ else:
 TOTAL_COINS = len(game_map.get_items(COIN))
 TIME_INITIAL = time.time()
 
+BURNING_TREES = []
+
 def tomapcoord(coord):
     return int(coord/B_SIZE)
 
@@ -160,6 +162,22 @@ class Player(pygame.sprite.Sprite):
                 player.collect(nextmapx, nextmapy, item)
                 self.y += self.speed
             self.orient = Player.DOWN
+        if keystate[pygame.K_SPACE]:
+            if self.orient == Player.UP:
+                nx = 0
+                ny = -1
+            if self.orient == Player.DOWN:
+                nx = 0
+                ny = 1
+            if self.orient == Player.LEFT:
+                nx = -1
+                ny = 0
+            if self.orient == Player.RIGHT:
+                nx = 1
+                ny = 0
+            if game_map.burn(mapx, mapy, nx, ny, self.specials):
+                self.sounds[Player.BURN].play()
+                BURNING_TREES.append([2*FPS, mapx+nx, mapy+ny])
 
     def draw(self, screen):
         screen.blit(self.image, (WIDTH//2-self.image.get_width() //
@@ -192,6 +210,13 @@ while running:
     TEXT_COINS = FONT.render('Coins : {0}/{1}'.format(player.coins, TOTAL_COINS), False, WHITE)
     TIME_NOW = int(time.time() - TIME_INITIAL)
     TEXT_TIME = FONT.render('Time : {0:02d}:{1:02d}'.format(TIME_NOW//60, TIME_NOW%60), False, WHITE)
+    # Update burning trees
+    for i in range(len(BURNING_TREES)):
+        if BURNING_TREES[i][0] == 0:
+            game_map.map[BURNING_TREES[i][1]][BURNING_TREES[i][2]]^=DRY_TREE_BURN
+            BURNING_TREES = BURNING_TREES[:i]+BURNING_TREES[i+1:]
+        else:
+            BURNING_TREES[i][0] = BURNING_TREES[i][0]-1
     # Draw / Render
     screen.fill(BLACK)
     game_map.draw(screen, cam_x=-WIDTH//2+player.x+player.hitbox.get_width() //
