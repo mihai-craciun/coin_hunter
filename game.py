@@ -212,12 +212,15 @@ while running:
     TIME_NOW = int(time.time() - TIME_INITIAL)
     TEXT_TIME = FONT.render('Time : {0:02d}:{1:02d}'.format(TIME_NOW//60, TIME_NOW%60), False, WHITE)
     # Update burning trees
-    for i in range(len(BURNING_TREES)):
+    i = 0
+    while i < len(BURNING_TREES):
         if BURNING_TREES[i][0] == 0:
             game_map.map[BURNING_TREES[i][1]][BURNING_TREES[i][2]]^=DRY_TREE_BURN
             BURNING_TREES = BURNING_TREES[:i]+BURNING_TREES[i+1:]
+            i-=1
         else:
             BURNING_TREES[i][0] = BURNING_TREES[i][0]-1
+        i+=1
     # Draw / Render
     screen.fill(BLACK)
     game_map.draw(screen, cam_x=-WIDTH//2+player.x+player.hitbox.get_width() //
