@@ -84,8 +84,9 @@ filters = {
 B_SIZE = B_SIZE * SCALE
 WIDTH = BLOCKS_X * B_SIZE
 HEIGHT = BLOCKS_Y * B_SIZE
-pygame.init()
+pygame.mixer.pre_init(44100, -16, 2, 2048)
 pygame.mixer.init()
+pygame.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 FONT = pygame.font.Font("pixelated.ttf", 10*SCALE)
 
@@ -188,6 +189,36 @@ class Map:
             for y,item in enumerate(line):
                 if item&PLAYER == PLAYER:
                     return (x,y)
+    
+    def get_items(self, item):
+        items = []
+        for x, line in enumerate(self.map):
+            for y,it in enumerate(line):
+                if it&item == item:
+                    items.append((x,y))
+        return items
+    
+    def can_move(self, px, py, px2, py2, specials):
+        print(px,py,px2,py2)
+        if px2 == 0 or py2 == 0 or px2 >= len(self.map) or py2 >= len(self.map[0]):
+            return False
+        block = self.map[px2][py2]
+        if block&TREE > 0 or block&DRY_TREE > 0 or block&DRY_TREE_BURN > 0:
+            return False
+        # special cases check specials items
+        if specials&BLUE_CRYSTAL == 0 and block&WATER > 0:
+            return False
+        return True
+    
+    def get_collectible(self, x, y):
+        item = None
+        for c in COLLECTIBLES:
+            if c&self.map[x][y]:
+                item = c
+        return item
+
+    def remove_collectible(self, x, y):
+        self.map[x][y] &= filters["COLLECTIBLES"]
 
     # DEBUG
     def printsize(self):

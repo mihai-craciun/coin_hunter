@@ -3,6 +3,7 @@ import pygame
 import random
 import sys
 import os
+import time
 from commons import *
 
 # Inits
@@ -29,6 +30,11 @@ else:
             print('Invalid map loaded, exiting.')
             sys.exit(0)
 
+TOTAL_COINS = len(game_map.get_items(COIN))
+TIME_INITIAL = time.time()
+
+def tomapcoord(coord):
+    return int(coord/B_SIZE)
 
 class Player(pygame.sprite.Sprite):
 
@@ -38,6 +44,9 @@ class Player(pygame.sprite.Sprite):
     RIGHT = 3
 
     WALK = 0
+    BURN = 1
+    GET_COIN = 2
+    GET_CRYSTAL = 3
 
     HITBOX = B_SIZE//2
     TICKER = FPS//12
@@ -70,7 +79,10 @@ class Player(pygame.sprite.Sprite):
             ],
         }
         self.sounds = {
-            Player.WALK: pygame.mixer.Sound('footstep.wav')
+            Player.WALK: pygame.mixer.Sound('footstep.wav'),
+            Player.BURN: pygame.mixer.Sound('burn.wav'),
+            Player.GET_COIN: pygame.mixer.Sound('coin.wav'),
+            Player.GET_CRYSTAL: pygame.mixer.Sound('crystal.wav'),
         }
 
         self.hitbox = pygame.Surface((Player.HITBOX, Player.HITBOX))
@@ -86,6 +98,19 @@ class Player(pygame.sprite.Sprite):
         self.count = 0
         self.count_ticker = Player.TICKER
         self.sounds[Player.WALK].set_volume(0.1)
+        self.specials = 0 # No special
+    
+    def collect(self, x, y, item):
+        game_map.remove_collectible(x,y)
+        if item is None:
+            return
+        if item == COIN:
+            self.sounds[Player.GET_COIN].play()
+            self.coins+=1
+            return
+        self.sounds[Player.GET_CRYSTAL].play()
+        self.specials |= item
+        return
 
     def update(self):
         keystate = pygame.key.get_pressed()
@@ -93,21 +118,47 @@ class Player(pygame.sprite.Sprite):
         if keystate[pygame.K_RIGHT] or keystate[pygame.K_LEFT] or keystate[pygame.K_UP] or keystate[pygame.K_DOWN]:
             self.count_ticker -= 1
             if self.count_ticker == 0:
-                self.sounds[Player.WALK].play()
+                # self.sounds[Player.WALK].play()
                 self.count_ticker = Player.TICKER
                 self.count = (self.count + 1) % 2
         self.image = self.images[self.orient][self.count]
+
+        HITBOX_OFFSET = 3*B_SIZE//4
+
+        mapx = tomapcoord(player.x + HITBOX_OFFSET)
+        mapy = tomapcoord(player.y + HITBOX_OFFSET)
+
         if keystate[pygame.K_RIGHT]:
-            self.x += self.speed
+            nextmapy = mapy
+            nextmapx = tomapcoord(player.x+self.speed + HITBOX_OFFSET)
+            if game_map.can_move(mapx, mapy, nextmapx, nextmapy, self.specials):
+                item = game_map.get_collectible(nextmapx, nextmapy)
+                player.collect(nextmapx, nextmapy, item)
+                self.x += self.speed
             self.orient = Player.RIGHT
         if keystate[pygame.K_LEFT]:
-            self.x -= self.speed
+            nextmapy = mapy
+            nextmapx = tomapcoord(player.x-self.speed + HITBOX_OFFSET//4)
+            if game_map.can_move(mapx, mapy, nextmapx, nextmapy, self.specials):
+                item = game_map.get_collectible(nextmapx, nextmapy)
+                player.collect(nextmapx, nextmapy, item)
+                self.x -= self.speed
             self.orient = Player.LEFT
         if keystate[pygame.K_UP]:
-            self.y -= self.speed
+            nextmapy = tomapcoord(player.y-self.speed + HITBOX_OFFSET)
+            nextmapx = mapx
+            if game_map.can_move(mapx, mapy, nextmapx, nextmapy, self.specials):
+                item = game_map.get_collectible(nextmapx, nextmapy)
+                player.collect(nextmapx, nextmapy, item)
+                self.y -= self.speed
             self.orient = Player.UP
         if keystate[pygame.K_DOWN]:
-            self.y += self.speed
+            nextmapy = tomapcoord(player.y+self.speed + HITBOX_OFFSET)
+            nextmapx = mapx
+            if game_map.can_move(mapx, mapy, nextmapx, nextmapy, self.specials):
+                item = game_map.get_collectible(nextmapx, nextmapy)
+                player.collect(nextmapx, nextmapy, item)
+                self.y += self.speed
             self.orient = Player.DOWN
 
     def draw(self, screen):
@@ -130,16 +181,36 @@ while running:
         # check for closing the window
         if event.type == pygame.QUIT:
             running = False
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_q:
+                running = False
     # Update
     all_sprites.update()
+    # Update writables
+    TEXT_X = FONT.render('X : {}'.format(tomapcoord(player.x)), False, WHITE)
+    TEXT_Y = FONT.render('Y : {}'.format(tomapcoord(player.y)), False, WHITE)
+    TEXT_COINS = FONT.render('Coins : {0}/{1}'.format(player.coins, TOTAL_COINS), False, WHITE)
+    TIME_NOW = int(time.time() - TIME_INITIAL)
+    TEXT_TIME = FONT.render('Time : {0:02d}:{1:02d}'.format(TIME_NOW//60, TIME_NOW%60), False, WHITE)
     # Draw / Render
     screen.fill(BLACK)
     game_map.draw(screen, cam_x=-WIDTH//2+player.x+player.hitbox.get_width() //
                   2, cam_y=-HEIGHT//2+player.y+player.hitbox.get_height()//2)
     all_sprites.draw(screen)
     # Draw stats
-
+    if player.coins == TOTAL_COINS:
+        WIN = FONT.render('You won!', False, WHITE)
+        screen.blit(WIN, (WIDTH//2 - WIN.get_width()//2, HEIGHT//2 - WIN.get_height()//2))
+    MARGIN_OFFSET = 10
+    screen.blit(TEXT_X, (MARGIN_OFFSET, -MARGIN_OFFSET + HEIGHT - TEXT_X.get_height()*2))
+    screen.blit(TEXT_Y, (MARGIN_OFFSET, -MARGIN_OFFSET + HEIGHT - TEXT_X.get_height()))
+    screen.blit(PNGS[COIN], (TEXT_COINS.get_width()+ MARGIN_OFFSET ,0))
+    screen.blit(TEXT_COINS, (MARGIN_OFFSET, PNGS[COIN].get_height()//2 - TEXT_COINS.get_height()//2))
+    screen.blit(TEXT_TIME, (WIDTH - TEXT_TIME.get_width() - MARGIN_OFFSET, MARGIN_OFFSET))
     # *after* drawing everything
     pygame.display.flip()
+    if player.coins == TOTAL_COINS:
+        time.sleep(1)
+        sys.exit(0)
 
 pygame.quit()
