@@ -200,7 +200,6 @@ class Map:
         return items
 
     def can_move(self, px, py, px2, py2, specials):
-        print(px, py, px2, py2)
         if px2 == 0 or py2 == 0 or px2 >= len(self.map) or py2 >= len(self.map[0]):
             return False
         block = self.map[px2][py2]

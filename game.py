@@ -208,6 +208,7 @@ while running:
     TEXT_X = FONT.render('X : {}'.format(tomapcoord(player.x)), False, WHITE)
     TEXT_Y = FONT.render('Y : {}'.format(tomapcoord(player.y)), False, WHITE)
     TEXT_COINS = FONT.render('Coins : {0}/{1}'.format(player.coins, TOTAL_COINS), False, WHITE)
+    TEXT_SPECIALS = FONT.render('Specials :', False, WHITE)
     TIME_NOW = int(time.time() - TIME_INITIAL)
     TEXT_TIME = FONT.render('Time : {0:02d}:{1:02d}'.format(TIME_NOW//60, TIME_NOW%60), False, WHITE)
     # Update burning trees
@@ -231,6 +232,12 @@ while running:
     screen.blit(TEXT_Y, (MARGIN_OFFSET, -MARGIN_OFFSET + HEIGHT - TEXT_X.get_height()))
     screen.blit(PNGS[COIN], (TEXT_COINS.get_width()+ MARGIN_OFFSET ,0))
     screen.blit(TEXT_COINS, (MARGIN_OFFSET, PNGS[COIN].get_height()//2 - TEXT_COINS.get_height()//2))
+    screen.blit(TEXT_SPECIALS, (MARGIN_OFFSET, PNGS[COIN].get_height()))
+    SPEC_OFFSET = 0
+    for c in COLLECTIBLES:
+        if c&player.specials:
+            screen.blit(PNGS[c], (MARGIN_OFFSET + TEXT_SPECIALS.get_width() + SPEC_OFFSET*PNGS[c].get_width(), 3*PNGS[COIN].get_width()//4))
+            SPEC_OFFSET+=1
     screen.blit(TEXT_TIME, (WIDTH - TEXT_TIME.get_width() - MARGIN_OFFSET, MARGIN_OFFSET))
     # *after* drawing everything
     pygame.display.flip()
